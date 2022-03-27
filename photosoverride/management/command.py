@@ -6,10 +6,13 @@ from django.core.management import BaseCommand
 from photosoverride.run import populate_parser
 
 
-class ConfigMixin:
+class LibraryCommand(BaseCommand):
     """Allow the --library argument."""
 
-    def add_arguments(self: BaseCommand, parser: ArgumentParser):
+    def handle(self, *args, **options):
+        raise NotImplementedError
+
+    def add_arguments(self, parser: ArgumentParser):
         """Override the default method to allow --library argument."""
         populate_parser(parser)
         # noinspection PyUnresolvedReferences
