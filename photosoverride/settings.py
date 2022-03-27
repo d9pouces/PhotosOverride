@@ -4,9 +4,11 @@ import pathlib
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+from django.utils.crypto import get_random_string
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY_ = "(7vgzv0+a@_tk^sz00bho6+k+7=mlt0g0%*@4t%g&z^$hsx2)#"
+SECRET_KEY_ = get_random_string(40)
 DEBUG = False
 ALLOWED_HOSTS = []
 INSTALLED_APPS = ["photosoverride.apps.POAppConfig"]

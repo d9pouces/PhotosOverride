@@ -25,6 +25,8 @@ REMOVED_DJANGO_COMMANDS = {
     "startproject": False,
     "test": True,
     "testserver": False,
+    "showmigrations": False,
+    "migrate": False,
 }
 
 

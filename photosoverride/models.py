@@ -2403,7 +2403,7 @@ class Zvisualsearchattributes(models.Model):
 
 class Z17Clusterrejectedpersons(models.Model):
     z_17clusterrejectedfaces = models.AutoField(
-        db_column="Z_17CLUSTERREJECTEDFACES", blank=True, null=True
+        primary_key=True, db_column="Z_17CLUSTERREJECTEDFACES", blank=True, null=True
     )
     z_45clusterrejectedpersons = models.IntegerField(
         db_column="Z_45CLUSTERREJECTEDPERSONS", blank=True, null=True
@@ -2416,7 +2416,7 @@ class Z17Clusterrejectedpersons(models.Model):
 
 class Z17Rejectedpersons(models.Model):
     z_17rejectedfaces = models.AutoField(
-        db_column="Z_17REJECTEDFACES", blank=True, null=True
+        primary_key=True, db_column="Z_17REJECTEDFACES", blank=True, null=True
     )
     z_45rejectedpersons = models.IntegerField(
         db_column="Z_45REJECTEDPERSONS", blank=True, null=True
@@ -2429,7 +2429,10 @@ class Z17Rejectedpersons(models.Model):
 
 class Z17Rejectedpersonsneedingfacecrops(models.Model):
     z_17rejectedfacesneedingfacecrops = models.AutoField(
-        db_column="Z_17REJECTEDFACESNEEDINGFACECROPS", blank=True, null=True
+        primary_key=True,
+        db_column="Z_17REJECTEDFACESNEEDINGFACECROPS",
+        blank=True,
+        null=True,
     )
     z_45rejectedpersonsneedingfacecrops = models.IntegerField(
         db_column="Z_45REJECTEDPERSONSNEEDINGFACECROPS", blank=True, null=True
@@ -2442,7 +2445,7 @@ class Z17Rejectedpersonsneedingfacecrops(models.Model):
 
 class Z1Keywords(models.Model):
     z_1assetattributes = models.AutoField(
-        db_column="Z_1ASSETATTRIBUTES", blank=True, null=True
+        primary_key=True, db_column="Z_1ASSETATTRIBUTES", blank=True, null=True
     )
     z_38keywords = models.IntegerField(db_column="Z_38KEYWORDS", blank=True, null=True)
 
@@ -2452,7 +2455,9 @@ class Z1Keywords(models.Model):
 
 
 class Z26Albumlists(models.Model):
-    z_26albums = models.AutoField(db_column="Z_26ALBUMS", blank=True, null=True)
+    z_26albums = models.AutoField(
+        primary_key=True, db_column="Z_26ALBUMS", blank=True, null=True
+    )
     z_2albumlists = models.IntegerField(
         db_column="Z_2ALBUMLISTS", blank=True, null=True
     )
@@ -2466,7 +2471,9 @@ class Z26Albumlists(models.Model):
 
 
 class Z27Assets(models.Model):
-    z_27albums = models.AutoField(db_column="Z_27ALBUMS", blank=True, null=True)
+    z_27albums = models.AutoField(
+        primary_key=True, db_column="Z_27ALBUMS", blank=True, null=True
+    )
     z_3assets = models.IntegerField(db_column="Z_3ASSETS", blank=True, null=True)
     z_fok_3assets = models.IntegerField(
         db_column="Z_FOK_3ASSETS", blank=True, null=True
@@ -2479,7 +2486,7 @@ class Z27Assets(models.Model):
 
 class Z3Memoriesbeingcuratedassets(models.Model):
     z_3curatedassets = models.AutoField(
-        db_column="Z_3CURATEDASSETS", blank=True, null=True
+        primary_key=True, db_column="Z_3CURATEDASSETS", blank=True, null=True
     )
     z_42memoriesbeingcuratedassets = models.IntegerField(
         db_column="Z_42MEMORIESBEINGCURATEDASSETS", blank=True, null=True
@@ -2492,7 +2499,7 @@ class Z3Memoriesbeingcuratedassets(models.Model):
 
 class Z3Memoriesbeingextendedcuratedassets(models.Model):
     z_3extendedcuratedassets = models.AutoField(
-        db_column="Z_3EXTENDEDCURATEDASSETS", blank=True, null=True
+        primary_key=True, db_column="Z_3EXTENDEDCURATEDASSETS", blank=True, null=True
     )
     z_42memoriesbeingextendedcuratedassets = models.IntegerField(
         db_column="Z_42MEMORIESBEINGEXTENDEDCURATEDASSETS", blank=True, null=True
@@ -2505,7 +2512,7 @@ class Z3Memoriesbeingextendedcuratedassets(models.Model):
 
 class Z3Memoriesbeingmoviecuratedassets(models.Model):
     z_3moviecuratedassets = models.AutoField(
-        db_column="Z_3MOVIECURATEDASSETS", blank=True, null=True
+        primary_key=True, db_column="Z_3MOVIECURATEDASSETS", blank=True, null=True
     )
     z_42memoriesbeingmoviecuratedassets = models.IntegerField(
         db_column="Z_42MEMORIESBEINGMOVIECURATEDASSETS", blank=True, null=True
@@ -2518,7 +2525,7 @@ class Z3Memoriesbeingmoviecuratedassets(models.Model):
 
 class Z3Memoriesbeingrepresentativeassets(models.Model):
     z_3representativeassets = models.AutoField(
-        db_column="Z_3REPRESENTATIVEASSETS", blank=True, null=True
+        primary_key=True, db_column="Z_3REPRESENTATIVEASSETS", blank=True, null=True
     )
     z_42memoriesbeingrepresentativeassets = models.IntegerField(
         db_column="Z_42MEMORIESBEINGREPRESENTATIVEASSETS", blank=True, null=True
@@ -2531,7 +2538,7 @@ class Z3Memoriesbeingrepresentativeassets(models.Model):
 
 class Z3Memoriesbeingusercuratedassets(models.Model):
     z_3usercuratedassets = models.AutoField(
-        db_column="Z_3USERCURATEDASSETS", blank=True, null=True
+        primary_key=True, db_column="Z_3USERCURATEDASSETS", blank=True, null=True
     )
     z_42memoriesbeingusercuratedassets = models.IntegerField(
         db_column="Z_42MEMORIESBEINGUSERCURATEDASSETS", blank=True, null=True
@@ -2543,7 +2550,9 @@ class Z3Memoriesbeingusercuratedassets(models.Model):
 
 
 class Z3Suggestionsbeingkeyassets(models.Model):
-    z_3keyassets = models.AutoField(db_column="Z_3KEYASSETS", blank=True, null=True)
+    z_3keyassets = models.AutoField(
+        primary_key=True, db_column="Z_3KEYASSETS", blank=True, null=True
+    )
     z_55suggestionsbeingkeyassets = models.IntegerField(
         db_column="Z_55SUGGESTIONSBEINGKEYASSETS", blank=True, null=True
     )
@@ -2555,7 +2564,7 @@ class Z3Suggestionsbeingkeyassets(models.Model):
 
 class Z3Suggestionsbeingrepresentativeassets(models.Model):
     z_3representativeassets1 = models.AutoField(
-        db_column="Z_3REPRESENTATIVEASSETS1", blank=True, null=True
+        primary_key=True, db_column="Z_3REPRESENTATIVEASSETS1", blank=True, null=True
     )
     z_55suggestionsbeingrepresentativeassets = models.IntegerField(
         db_column="Z_55SUGGESTIONSBEINGREPRESENTATIVEASSETS", blank=True, null=True
@@ -2568,7 +2577,7 @@ class Z3Suggestionsbeingrepresentativeassets(models.Model):
 
 class Z45Invalidmergecandidates(models.Model):
     z_45invalidmergecandidates = models.AutoField(
-        db_column="Z_45INVALIDMERGECANDIDATES", blank=True, null=True
+        primary_key=True, db_column="Z_45INVALIDMERGECANDIDATES", blank=True, null=True
     )
     reflexive = models.IntegerField(db_column="REFLEXIVE", blank=True, null=True)
 
@@ -2579,7 +2588,7 @@ class Z45Invalidmergecandidates(models.Model):
 
 class Z45Mergecandidates(models.Model):
     z_45mergecandidates = models.AutoField(
-        db_column="Z_45MERGECANDIDATES", blank=True, null=True
+        primary_key=True, db_column="Z_45MERGECANDIDATES", blank=True, null=True
     )
     reflexive = models.IntegerField(db_column="REFLEXIVE", blank=True, null=True)
 
