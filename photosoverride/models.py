@@ -343,11 +343,12 @@ class Zalbumlist(models.Model):
 
 
 class Z1Keywords(models.Model):
-    z_1assetattributes = models.ForeignKey(
+    z_1assetattributes = models.OneToOneField(
         to="Zadditionalassetattributes",
         db_column="Z_1ASSETATTRIBUTES",
         primary_key=True,
         on_delete=models.CASCADE,
+        related_name="+",
     )
     z_38keywords = models.ForeignKey(
         to="Zkeyword",
