@@ -25,6 +25,12 @@ class Command(LibraryCommand):
             "--missing-keyword", help="Keyword to add to missing pictures."
         )
         parser.add_argument(
+            "--clean-keywords",
+            help="Remove keywords from all pictures.",
+            default=False,
+            action="store_true",
+        )
+        parser.add_argument(
             "--small-size",
             help="Max size of small pictures (in bytes).",
             default=100 * 1000,
@@ -53,14 +59,19 @@ class Command(LibraryCommand):
         large_size = options["large_size"]
         small_keyword = self.get_keyword(options["small_keyword"])
         small_size = options["small_size"]
+        clean_keywords = options["clean_keywords"]
 
         keywords_existing: Dict[int, Set[int]] = defaultdict(lambda: set())
         duplicates: Dict[str, List[Zadditionalassetattributes]] = defaultdict(
             lambda: []
         )
         for keyword in (missing_keyword, large_keyword, small_keyword):
-            if keyword:
-                qs = Z1Keywords.objects.filter(z_38keywords_id=keyword.pk)
+            if not keyword:
+                continue
+            qs = Z1Keywords.objects.filter(z_38keywords_id=keyword.pk)
+            if clean_keywords:
+                qs.delete()
+            else:
                 keywords_existing[keyword.pk] |= set(
                     qs.values_list("z_1assetattributes_id", flat=True)
                 )
@@ -77,7 +88,7 @@ class Command(LibraryCommand):
                 and ext.pk not in keywords_existing[small_keyword.pk]
             ):
                 self.stderr.write(
-                    "Small picture: %s (%d bytes)"
+                    self.style.WARNING("Small picture: %s (%d bytes)")
                     % (ext.asset.picture_path, ext.original_filesize)
                 )
                 keywords_to_add.append(
@@ -91,8 +102,8 @@ class Command(LibraryCommand):
                 and ext.original_filesize > large_size
                 and ext.pk not in keywords_existing[large_keyword.pk]
             ):
-                self.stderr.write(
-                    "Small picture: %s (%d bytes)"
+                self.stdout.write(
+                    self.style.WARNING("Large picture: %s (%d bytes)")
                     % (ext.asset.picture_path, ext.original_filesize)
                 )
                 keywords_to_add.append(
@@ -116,22 +127,31 @@ class Command(LibraryCommand):
                 keywords_existing[missing_keyword.pk].add(ext.pk)
         Z1Keywords.objects.bulk_create(keywords_to_add)
 
-        self.find_duplicates(original_keyword, duplicate_keyword, duplicates)
+        self.find_duplicates(
+            original_keyword,
+            duplicate_keyword,
+            duplicates,
+            clean_keywords=clean_keywords,
+        )
 
     def find_duplicates(
         self,
         original_keyword: Optional[Zkeyword],
         duplicate_keyword: Optional[Zkeyword],
         duplicates: Dict[str, List[Zadditionalassetattributes]],
+        clean_keywords: bool = False,
     ):
-        if original_keyword and duplicate_keyword:
-            values = [original_keyword.pk, duplicate_keyword.pk]
-            Z1Keywords.objects.filter(z_38keywords_id__in=values).delete()
-        elif original_keyword:
-            Z1Keywords.objects.filter(z_38keywords_id=original_keyword.pk).delete()
-        elif duplicate_keyword:
-            Z1Keywords.objects.filter(z_38keywords_id=duplicate_keyword.pk).delete()
+        values = []
         duplicate_existing = set()
+        if original_keyword:
+            values.append(original_keyword.pk)
+        if duplicate_keyword:
+            values.append(duplicate_keyword.pk)
+        if clean_keywords:
+            Z1Keywords.objects.filter(z_38keywords_id__in=values).delete()
+        else:
+            qs = Z1Keywords.objects.filter(z_38keywords_id__in=values)
+            duplicate_existing = set(qs.values_list("z_1assetattributes_id", flat=True))
         actual_candidates_lists: List[List[Zasset]] = []
         for key, candidates_list in duplicates.items():
             if len(candidates_list) > 1:
