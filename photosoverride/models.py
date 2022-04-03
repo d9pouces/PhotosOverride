@@ -79,7 +79,7 @@ class Atransactionstring(models.Model):
         db_table = "ATRANSACTIONSTRING"
 
 
-class Zadditionalassetattributes(models.Model):
+class AdditionalAssetAttributes(models.Model):
     z_pk = models.AutoField(db_column="Z_PK", primary_key=True)
     z_ent = models.IntegerField(db_column="Z_ENT", blank=True, null=True)
     z_opt = models.IntegerField(db_column="Z_OPT", blank=True, null=True)
@@ -185,7 +185,7 @@ class Zadditionalassetattributes(models.Model):
     )
     view_count = models.IntegerField(db_column="ZVIEWCOUNT", blank=True, null=True)
     asset = models.OneToOneField(
-        to="Zasset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
+        to="Asset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
     )
     asset_description = models.IntegerField(
         db_column="ZASSETDESCRIPTION", blank=True, null=True
@@ -320,7 +320,7 @@ class Zadditionalassetattributes(models.Model):
     date_created_source = models.IntegerField(
         db_column="ZDATECREATEDSOURCE", blank=True, null=True
     )
-    keywords = models.ManyToManyField(to="Zkeyword", through="Z1Keywords")
+    keywords = models.ManyToManyField(to="Keyword", through="AssetKeywords")
 
     class Meta:
         managed = False
@@ -342,16 +342,16 @@ class Zalbumlist(models.Model):
         db_table = "ZALBUMLIST"
 
 
-class Z1Keywords(models.Model):
+class AssetKeywords(models.Model):
     z_1assetattributes = models.OneToOneField(
-        to="Zadditionalassetattributes",
+        to="AdditionalAssetAttributes",
         db_column="Z_1ASSETATTRIBUTES",
         primary_key=True,
         on_delete=models.CASCADE,
         related_name="+",
     )
     z_38keywords = models.ForeignKey(
-        to="Zkeyword",
+        to="Keyword",
         db_column="Z_38KEYWORDS",
         blank=True,
         null=True,
@@ -363,7 +363,7 @@ class Z1Keywords(models.Model):
         db_table = "Z_1KEYWORDS"
 
 
-class Zasset(models.Model):
+class Asset(models.Model):
     z_pk = models.AutoField(db_column="Z_PK", primary_key=True)
     z_ent = models.IntegerField(db_column="Z_ENT", blank=True, null=True)
     z_opt = models.IntegerField(db_column="Z_OPT", blank=True, null=True)
@@ -470,7 +470,7 @@ class Zasset(models.Model):
     )
     width = models.IntegerField(db_column="ZWIDTH", blank=True, null=True)
     additionalattributes = models.OneToOneField(
-        to="Zadditionalassetattributes",
+        to="AdditionalAssetAttributes",
         db_column="ZADDITIONALATTRIBUTES",
         on_delete=models.CASCADE,
         related_name="+",
@@ -648,7 +648,7 @@ class Zasset(models.Model):
         subprocess.check_call(["open", str(self.picture_path)])
 
 
-class Zassetanalysisstate(models.Model):
+class AssetAnalysisState(models.Model):
     z_pk = models.AutoField(db_column="Z_PK", primary_key=True)
     z_ent = models.IntegerField(db_column="Z_ENT", blank=True, null=True)
     z_opt = models.IntegerField(db_column="Z_OPT", blank=True, null=True)
@@ -658,7 +658,7 @@ class Zassetanalysisstate(models.Model):
     workerflags = models.IntegerField(db_column="ZWORKERFLAGS", blank=True, null=True)
     workertype = models.IntegerField(db_column="ZWORKERTYPE", blank=True, null=True)
     asset = models.OneToOneField(
-        to="Zasset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
+        to="Asset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
     )
     ignoreuntildate = models.TextField(
         db_column="ZIGNOREUNTILDATE", blank=True, null=True
@@ -676,7 +676,7 @@ class Zassetanalysisstate(models.Model):
         db_table = "ZASSETANALYSISSTATE"
 
 
-class Zassetdescription(models.Model):
+class AssetDescription(models.Model):
     z_pk = models.AutoField(db_column="Z_PK", primary_key=True)
     z_ent = models.IntegerField(db_column="Z_ENT", blank=True, null=True)
     z_opt = models.IntegerField(db_column="Z_OPT", blank=True, null=True)
@@ -849,7 +849,7 @@ class Zcloudresource(models.Model):
     type = models.IntegerField(db_column="ZTYPE", blank=True, null=True)
     width = models.IntegerField(db_column="ZWIDTH", blank=True, null=True)
     asset = models.OneToOneField(
-        to="Zasset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
+        to="Asset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
     )
     cloud_master = models.IntegerField(db_column="ZCLOUDMASTER", blank=True, null=True)
     datecreated = models.TextField(db_column="ZDATECREATED", blank=True, null=True)
@@ -978,7 +978,7 @@ class Zcomputedassetattributes(models.Model):
     z_ent = models.IntegerField(db_column="Z_ENT", blank=True, null=True)
     z_opt = models.IntegerField(db_column="Z_OPT", blank=True, null=True)
     asset = models.OneToOneField(
-        to="Zasset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
+        to="Asset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
     )
     behavioralscore = models.TextField(
         db_column="ZBEHAVIORALSCORE", blank=True, null=True
@@ -1162,7 +1162,7 @@ class Zdetectedface(models.Model):
     trainingtype = models.IntegerField(db_column="ZTRAININGTYPE", blank=True, null=True)
     vipmodeltype = models.IntegerField(db_column="ZVIPMODELTYPE", blank=True, null=True)
     asset = models.OneToOneField(
-        to="Zasset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
+        to="Asset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
     )
     facecrop = models.IntegerField(db_column="ZFACECROP", blank=True, null=True)
     facegroup = models.IntegerField(db_column="ZFACEGROUP", blank=True, null=True)
@@ -1478,7 +1478,7 @@ class Zextendedattributes(models.Model):
     trackformat = models.IntegerField(db_column="ZTRACKFORMAT", blank=True, null=True)
     whitebalance = models.IntegerField(db_column="ZWHITEBALANCE", blank=True, null=True)
     asset = models.OneToOneField(
-        to="Zasset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
+        to="Asset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
     )
     aperture = models.TextField(db_column="ZAPERTURE", blank=True, null=True)
     bitrate = models.TextField(db_column="ZBITRATE", blank=True, null=True)
@@ -1533,7 +1533,7 @@ class Zfacecrop(models.Model):
     state = models.IntegerField(db_column="ZSTATE", blank=True, null=True)
     type = models.IntegerField(db_column="ZTYPE", blank=True, null=True)
     asset = models.OneToOneField(
-        to="Zasset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
+        to="Asset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
     )
     face = models.IntegerField(db_column="ZFACE", blank=True, null=True)
     person = models.IntegerField(db_column="ZPERSON", blank=True, null=True)
@@ -1828,7 +1828,7 @@ class Zinternalresource(models.Model):
     )
     version = models.IntegerField(db_column="ZVERSION", blank=True, null=True)
     asset = models.OneToOneField(
-        to="Zasset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
+        to="Asset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
     )
     filesystembookmark = models.IntegerField(
         db_column="ZFILESYSTEMBOOKMARK", blank=True, null=True
@@ -1877,7 +1877,7 @@ class Zinternalresource(models.Model):
         )
 
 
-class Zkeyword(models.Model):
+class Keyword(models.Model):
     z_pk = models.AutoField(db_column="Z_PK", primary_key=True)
     z_ent = models.IntegerField(db_column="Z_ENT", blank=True, null=True)
     z_opt = models.IntegerField(db_column="Z_OPT", blank=True, null=True)
@@ -1903,7 +1903,7 @@ class Zlegacyface(models.Model):
     z_opt = models.IntegerField(db_column="Z_OPT", blank=True, null=True)
     identifier = models.IntegerField(db_column="ZIDENTIFIER", blank=True, null=True)
     asset = models.OneToOneField(
-        to="Zasset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
+        to="Asset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
     )
     albumuuid = models.CharField(
         max_length=500, db_column="ZALBUMUUID", blank=True, null=True
@@ -1967,7 +1967,7 @@ class Zmediaanalysisassetattributes(models.Model):
         db_column="ZPACKEDBESTPLAYBACKRECT", blank=True, null=True
     )
     asset = models.OneToOneField(
-        to="Zasset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
+        to="Asset", db_column="ZASSET", on_delete=models.CASCADE, related_name="+"
     )
     activityscore = models.TextField(db_column="ZACTIVITYSCORE", blank=True, null=True)
     autoplaysuggestionscore = models.TextField(

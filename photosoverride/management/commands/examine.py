@@ -1,13 +1,14 @@
 import argparse
+import shlex
 from collections import defaultdict
 from typing import Dict, List, Optional, Set
 
 from photosoverride.management.command import LibraryCommand
 from photosoverride.models import (
-    Z1Keywords,
-    Zadditionalassetattributes,
-    Zasset,
-    Zkeyword,
+    AdditionalAssetAttributes,
+    Asset,
+    AssetKeywords,
+    Keyword,
 )
 
 
@@ -44,12 +45,19 @@ class Command(LibraryCommand):
         )
         parser.add_argument("--small-keyword", help="Keyword to add to small pictures.")
         parser.add_argument("--large-keyword", help="Keyword to add to large pictures.")
+        parser.add_argument(
+            "--no-md5",
+            help="Do not use md5 to compare pictures, only EXIF timestamp.",
+            default=True,
+            action="store_false",
+            dest="compare_md5",
+        )
 
     @staticmethod
-    def get_keyword(value: Optional[str]) -> Optional[Zkeyword]:
+    def get_keyword(value: Optional[str]) -> Optional[Keyword]:
         if not value:
             return None
-        return Zkeyword.objects.get(title=value)
+        return Keyword.objects.get(title=value)
 
     def handle(self, *args, **options):
         missing_keyword = self.get_keyword(options["missing_keyword"])
@@ -59,16 +67,15 @@ class Command(LibraryCommand):
         large_size = options["large_size"]
         small_keyword = self.get_keyword(options["small_keyword"])
         small_size = options["small_size"]
-        clean_keywords = options["clean_keywords"]
+        clean_keywords: bool = options["clean_keywords"]
+        use_md5: bool = options["compare_md5"]
 
         keywords_existing: Dict[int, Set[int]] = defaultdict(lambda: set())
-        duplicates: Dict[str, List[Zadditionalassetattributes]] = defaultdict(
-            lambda: []
-        )
+        duplicates: Dict[str, List[AdditionalAssetAttributes]] = defaultdict(lambda: [])
         for keyword in (missing_keyword, large_keyword, small_keyword):
             if not keyword:
                 continue
-            qs = Z1Keywords.objects.filter(z_38keywords_id=keyword.pk)
+            qs = AssetKeywords.objects.filter(z_38keywords_id=keyword.pk)
             if clean_keywords:
                 qs.delete()
             else:
@@ -77,10 +84,10 @@ class Command(LibraryCommand):
                 )
 
         keywords_to_add = []
-        for ext in Zadditionalassetattributes.objects.all().select_related("asset"):
+        for ext in AdditionalAssetAttributes.objects.all().select_related("asset"):
             if ext.exif_timestamp_string:
                 duplicates[ext.exif_timestamp_string].append(ext)
-            if ext.original_filesize:
+            if ext.original_filesize and use_md5:
                 duplicates[str(ext.original_filesize)].append(ext)
             if (
                 small_keyword
@@ -92,7 +99,7 @@ class Command(LibraryCommand):
                     % (ext.asset.picture_path, ext.original_filesize)
                 )
                 keywords_to_add.append(
-                    Z1Keywords(
+                    AssetKeywords(
                         z_38keywords_id=small_keyword.pk, z_1assetattributes_id=ext.pk
                     )
                 )
@@ -107,7 +114,7 @@ class Command(LibraryCommand):
                     % (ext.asset.picture_path, ext.original_filesize)
                 )
                 keywords_to_add.append(
-                    Z1Keywords(
+                    AssetKeywords(
                         z_38keywords_id=large_keyword.pk, z_1assetattributes_id=ext.pk
                     )
                 )
@@ -120,26 +127,27 @@ class Command(LibraryCommand):
             ):
                 self.stderr.write("Missing file: %s" % ext.asset.picture_path)
                 keywords_to_add.append(
-                    Z1Keywords(
+                    AssetKeywords(
                         z_38keywords_id=missing_keyword.pk, z_1assetattributes_id=ext.pk
                     )
                 )
                 keywords_existing[missing_keyword.pk].add(ext.pk)
-        Z1Keywords.objects.bulk_create(keywords_to_add)
-
+        AssetKeywords.objects.bulk_create(keywords_to_add)
         self.find_duplicates(
             original_keyword,
             duplicate_keyword,
             duplicates,
             clean_keywords=clean_keywords,
+            use_md5=use_md5,
         )
 
     def find_duplicates(
         self,
-        original_keyword: Optional[Zkeyword],
-        duplicate_keyword: Optional[Zkeyword],
-        duplicates: Dict[str, List[Zadditionalassetattributes]],
+        original_keyword: Optional[Keyword],
+        duplicate_keyword: Optional[Keyword],
+        duplicates: Dict[str, List[AdditionalAssetAttributes]],
         clean_keywords: bool = False,
+        use_md5: bool = False,
     ):
         values = []
         duplicate_existing = set()
@@ -148,33 +156,40 @@ class Command(LibraryCommand):
         if duplicate_keyword:
             values.append(duplicate_keyword.pk)
         if clean_keywords:
-            Z1Keywords.objects.filter(z_38keywords_id__in=values).delete()
+            AssetKeywords.objects.filter(z_38keywords_id__in=values).delete()
         else:
-            qs = Z1Keywords.objects.filter(z_38keywords_id__in=values)
+            qs = AssetKeywords.objects.filter(z_38keywords_id__in=values)
             duplicate_existing = set(qs.values_list("z_1assetattributes_id", flat=True))
-        actual_candidates_lists: List[List[Zasset]] = []
-        for key, candidates_list in duplicates.items():
-            if len(candidates_list) > 1:
-                actual_candidates_lists.append([x.asset for x in candidates_list])
-        actual_duplicates_by_shasum = defaultdict(lambda: [])
-        for candidates_list in actual_candidates_lists:
-            for candidate in candidates_list:
-                if candidate.picture_path.exists():
-                    actual_duplicates_by_shasum[candidate.shasum].append(candidate)
+        if use_md5:
+            actual_candidates_lists: List[List[Asset]] = []
+            for key, candidates_list in duplicates.items():
+                if len(candidates_list) > 1:
+                    actual_candidates_lists.append([x.asset for x in candidates_list])
+            actual_duplicates_by_shasum = defaultdict(lambda: [])
+            for candidates_list in actual_candidates_lists:
+                for candidate in candidates_list:
+                    if candidate.picture_path.exists():
+                        actual_duplicates_by_shasum[candidate.shasum].append(candidate)
+        else:
+            actual_duplicates_by_shasum = {
+                x: [y.asset for y in z] for (x, z) in duplicates.items()
+            }
         duplicate_to_create = []
         for actual_duplicates in actual_duplicates_by_shasum.values():
             if len(actual_duplicates) == 1:
                 continue
             actual_duplicates.sort(key=lambda x: x.z_pk)
-            dup: Zasset = actual_duplicates[0]
-            msg = "%s: %s copies" % (dup.picture_path, len(actual_duplicates))
+            dup: Asset = actual_duplicates[0]
+            msg = " ".join(
+                [shlex.quote(str(x.picture_path.absolute())) for x in actual_duplicates]
+            )
             self.stdout.write(self.style.SUCCESS(msg))
             obj = dup.additionalattributes_id
             if obj not in duplicate_existing:
                 duplicate_existing.add(obj)
                 if original_keyword:
                     duplicate_to_create.append(
-                        Z1Keywords(
+                        AssetKeywords(
                             z_38keywords_id=original_keyword.pk,
                             z_1assetattributes_id=obj,
                         )
@@ -186,9 +201,9 @@ class Command(LibraryCommand):
                 if obj_id not in duplicate_existing:
                     duplicate_existing.add(obj_id)
                     duplicate_to_create.append(
-                        Z1Keywords(
+                        AssetKeywords(
                             z_38keywords_id=duplicate_keyword.pk,
                             z_1assetattributes_id=obj_id,
                         )
                     )
-        Z1Keywords.objects.bulk_create(duplicate_to_create)
+        AssetKeywords.objects.bulk_create(duplicate_to_create)
